@@ -44,6 +44,7 @@ Dongni Han\\
 
 In our report, we use AP or ``server'' to denote the WiFi access point, and
 ``client'' to denote the terminal device such as a mobile phone, a tablet, and
+<<<<<<< HEAD
 so on. Throughout our simulation, we let node $0$ be the server, and the other nodes be the clients. The basic time unit for packet transmission is called \emph{slot}, which should be greater than a round-trip time (RTT). For real-time traffic, we group an integer number (denoted by $T$) of slots into an \emph{interval}, which is the relative deadline of the packets.
 
 \section{Background}
@@ -179,6 +180,42 @@ and state transitions are illustrated in Figure~\ref{fig:state}.
 \caption{State transitions of the AP.}
 \label{fig:state}
 \end{figure}
+=======
+so on. Throughout our simulation, we let node $0$ be the server, and the other nodes be the clients. The basic time unit for packet transmission is called \emph{slot}, which should be greater than a round-trip time (RTT). For real-time traffic, we group an integer number (denoted by $T$) of slots into an \emph{interval}, which is the relative deadline of the packets. 
+
+S-WiFi is the name of our application as well as our project. It stands for
+Smart WiFi, or whatever you think it is.
+
+%\section*{Simulation Setup}
+
+\section*{Uplink Transmissions with PCF}
+\label{section: uplink}
+Throughout the report, we consider a wireless network of one AP and $N$ clients, where $N>1$. We consider uplink transmission with PCF from the clients to the AP. In PCF mode, the AP has full control over channel allocation. In the beginning of each interval, each client generates a random number of packets and waits for channel access that is fully controlled by the AP. Since the packets are generated and queued on the client's side, the AP needs to collect the queue information of the clients to make scheduling decisions. The baseline policy is described in Section \ref{section: baseline}.
+\section{Baseline Policy}
+\label{section: baseline}
+
+
+\frenchspacing  Under the baseline policy, there are two phases in each interval. In the \emph{polling phase}, the AP collects the queue information by polling each client in a round-robin fashion. In the \emph{scheduling phase}, the AP schedules one of the clients based on the queue information and channel reliability.
+
+\subsection{Polling Phase}
+In the beginning of each interval, the AP gathers the queue information by sending \lstinline|SWiFi_POLL_NUM| packets to each client based on round-robin policy. Upon receiving the \lstinline|SWiFi_POLL_NUM|, the client will reply with a \lstinline|SWiFi_PKT_NUM_UL| packet which contains the queue information in the packet header. If either the transmission of \lstinline|SWiFi_POLL_NUM| or \lstinline|SWiFi_PKT_NUM_UL| fails, the AP will retransmit the \lstinline|SWiFi_POLL_NUM| packet again to the same client in the next slot. 
+The polling phase ends when the AP receives all the queue information from the clients.
+
+In the real-time scenario, the queue information is referred to as the number of packets generated in the current interval. On the other hand, for the non-real-time traffic, the queue information corresponds to the total number of packets received up to the present (denoted by $X_n$), which is used by the AP to obtain the real queue length of each client.    
+%The AP will first send a POLL packet to the selected client. A client can only transmit its packet after it receives the POLL packet from the AP. This allows the AP to have full control over which client transmits. 
+
+%Baseline policy: At the beginning of each interval, the AP asks each client, one by one, the number of packets that it generates. After this process, the AP also knows the number of packets at each client, and it can make the best decision.
+\subsection{Scheduling Phase}
+In each slot of the scheduling phase, the AP applies the Max-Weight policy, which schedules the client that maximizes the product of the queue length and the channel reliability. The AP sends a \lstinline|SWiFi_PKT_POLL_DATA| packet to the target client to provide access to the channel. When the scheduled client receives the data polling request, it will reply a packet of type \lstinline|SWiFi_PKT_DATA_UL| immediately to the AP. If the AP receives the data packet successfully, the AP will decrease the queue length by 1. If either the transmission of data polling or the data packet fails, the AP will stay with the same schedule in the next slot (suppose the next slot is not the end of the interval). Note that in the non-real-time scenario, in order to derive the real queue length of each client, the AP needs to keep track of the total number of received packets (denoted by $Y_n$) from each client $n$, and then calculates the queue length as $(X_n - Y_n)$ for each client $n$.
+
+If the AP already receives all the packets available in the current interval, it will simply idle until the start of the next interval.
+
+%Besides, we define four data types. 
+     
+
+\section{Implementation in NS-2}
+\label{section: ns2}
+>>>>>>> 799cae6cfd800336381f93439379afd1fef3fde1
 
 
 \section{Simulation Results}
@@ -218,6 +255,7 @@ Throughout the simulation, we consider a fully-symmetric network with one AP and
 
 For the medium access control (MAC) layer, we use the 802.11 module built in ns-2. Following the IEEE 802.11b standard, the MAC layer parameters are chosen as in Table \ref{table: mac}. Besides, the automatic retry function built in 802.11 is disabled, i.e. \lstinline|ShortRetryLimit_| and \lstinline|LongRetryLimit_| are set to be 0 in the Tcl domain, to avoid channel congestion due to uncontrollable retransmission in the MAC layer.
 
+<<<<<<< HEAD
 Throughout the simulation, a slot is chosen to be $\SI{10}{ms}$, which is much
 longer than a RTT ($\approx\SI{1.63}{ms}$), to provide enough margin for packet
 delivery. We consider random packet arrivals. The number of packets generated in
@@ -234,11 +272,23 @@ set of parameters.
 \subsection{Network Capacity}
 We first study the network capacity with different packet generation rates under the baseline policy. Let $T=10$ and the channels be reliable, i.e. $p_1 = p_2 = 1$.
 We measure the average network throughput (denoted by $\bar{R}$) with different $N_{max}$.
+=======
+Since ns-2 has no PCF module, we mimic PCF in the application layer. Throughout the simulation, a slot is chosen to be $\SI{10}{ms}$, which is much longer than a RTT ($\approx\SI{1.63}{ms}$), to provide enough margin for packet delivery. We consider random packet arrivals. The number of packets generated in an interval follows discrete uniform distribution that ranges between 0 and $N_{max}$. 
+
+
+\label{section: simulation}
+\subsection{Network Capacity}
+We first study the network capacity with different packet generation rates under the baseline policy. Let $T=10$ and the channels be reliable, i.e. $p_1 = p_2 = 1$. We measure the average network throughput (denoted by $\bar{R}$) with different $N_{max}$.
+>>>>>>> 799cae6cfd800336381f93439379afd1fef3fde1
 
 In the non-real-time scenario, Figure \ref{nonrealtime_throughput_randmax} shows the system throughput for $N_{max}$ between 1 and 12. We can see that the maximum achievable throughput is 8, less than $T$. This is because the AP has to collect the queue information in the polling phase, which lasts for 2 slots in every interval. Therefore, polling indeed reduces the network capacity. Moreover, the dashed line shows the expected network throughput if there is no randomness in packet generation. Thus, for non-real-time traffic, randomness in packet generation does not affect the network throughput.
 \begin{figure}[htbp]
 \centering
+<<<<<<< HEAD
 \includegraphics[width=.6\textwidth]{nonrealtime_throughput_randmax.pdf}
+=======
+\includegraphics[scale=0.5]{nonrealtime_throughput_randmax.pdf}
+>>>>>>> 799cae6cfd800336381f93439379afd1fef3fde1
 \caption{Network throughput versus $N_{max}$ with non-real-time traffic}
 \label{nonrealtime_throughput_randmax}
 \end{figure}
@@ -247,7 +297,11 @@ For real-time traffic, the network throughput is shown in Figure \ref{realtime_t
 
 \begin{figure}[htbp]
 \centering
+<<<<<<< HEAD
 \includegraphics[width=.6\textwidth]{realtime_throughput_randmax.pdf}
+=======
+\includegraphics[scale=0.5]{realtime_throughput_randmax.pdf}
+>>>>>>> 799cae6cfd800336381f93439379afd1fef3fde1
 \caption{Network throughput versus $N_{max}$ with real-time traffic}
 \label{realtime_throughput_randmax}
 \end{figure}
@@ -259,7 +313,11 @@ We study the how the choice of $T$ affects the network throughput. Choose $N_{ma
 
 \begin{figure}[htbp]
 \centering
+<<<<<<< HEAD
 \includegraphics[width=.6\textwidth]{nonrealtime_throughput_T.pdf}
+=======
+\includegraphics[scale=0.7]{nonrealtime_throughput_T.pdf}
+>>>>>>> 799cae6cfd800336381f93439379afd1fef3fde1
 \caption{Network throughput versus interval length with non-real-time traffic.}
 \label{nonrealtime_throughput_T}
 \end{figure}
@@ -268,7 +326,11 @@ Figure \ref{realtime_throughput_T} shows the network throughput with different i
 
 \begin{figure}[htbp]
 \centering
+<<<<<<< HEAD
 \includegraphics[width=.6\textwidth]{realtime_throughput_T.pdf}
+=======
+\includegraphics[scale=0.7]{realtime_throughput_T.pdf}
+>>>>>>> 799cae6cfd800336381f93439379afd1fef3fde1
 \caption{Network throughput versus interval length with real-time traffic.}
 \label{realtime_throughput_T}
 \end{figure}
@@ -276,6 +338,7 @@ Figure \ref{realtime_throughput_T} shows the network throughput with different i
 \subsection{Network Size and Polling Overhead}
 \begin{figure}[htbp]
 \centering
+<<<<<<< HEAD
 \includegraphics[width=.6\textwidth]{nonrealtime_throughput_K.pdf}
 \caption{Network throughput versus network size with non-real-time traffic.}
 \label{nonrealtime_throughput_K}
@@ -294,4 +357,29 @@ In both scenarios, the network performance degrades severely with more clients. 
 \section{Conclusion}
 The baseline policy employs a simple polling scheme to collect queue information of the clients. Accordingly, the AP can be work-conserving in the scheduling phase. However, the channel utilization for data packets can be low due to the polling overhead. The overhead can degrade the network performance even more severely when the number of clients is large or the interval length is small. To mitigate this effect, we definitely need a smarter policy to accommodate uplink transmission with PCF.
 
+=======
+\includegraphics[scale=0.7]{nonrealtime_throughput_N.pdf}
+\caption{Network throughput versus network size with non-real-time traffic.}
+\label{nonrealtime_throughput_N}
+\end{figure}
+
+%For real-time traffic, according to Figure \ref{realtime_throughput_N}, N ranges from 1 to 5. We can conclude that channel performance is even worse compared with non-real-time traffic and it also degrades with more clients. The reason is that packets will expire if they miss its deadline.  
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[scale=0.7]{realtime_throughput_N.pdf}
+\caption{Network throughput versus network size with real-time traffic.}
+\label{realtime_throughput_N}
+\end{figure}
+We study the effect of network size on the polling overhead. Let $T = 10$, $N_{max}=2$, and channel reliability $p_1 = p_2 = 0.57$. Figure \ref{nonrealtime_throughput_N} shows the network throughput with non-real-traffic traffic for different network size. When $K$ grows from 1 to 3, the total throughput increases since the total traffic is not saturated yet. As $K$ exceeds 3, the network throughput drops significantly because the polling phase takes most of the time in an interval. Figure \ref{realtime_throughput_N} shows a similar pattern for the real-time case. 
+
+In both scenarios, the network performance degrades severely with more clients. Hence, the baseline policy is not suitable for large networks due to the polling overhead. 
+%For non-real-time traffic, according to , N ranges from 1 to 5. 
+
+
+
+\section{Conclusion}
+The baseline policy employs a simple polling scheme to collect queue information of the clients. Accordingly, the AP can be work-conserving in the scheduling phase. However, the channel utilization for data packets can be low due to the polling overhead. The overhead can degrade the network performance even more severely when the number of clients is large or the interval length is small. To mitigate this effect, we definitely need a smarter policy to accommodate uplink transmission with PCF.
+
+>>>>>>> 799cae6cfd800336381f93439379afd1fef3fde1
 \end{document}
